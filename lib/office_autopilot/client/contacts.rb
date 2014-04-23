@@ -37,6 +37,12 @@ module OfficeAutopilot
         parse_contacts_xml(response)
       end
 
+      def contacts_add_tag(id,tag)
+        xml = xml_for_tag(id,tag)
+        response = request(:post, CONTACTS_ENDPOINT, :body => {'reqType' => 'add_tag', 'data' => xml})
+        parse_xml(response, "tag")
+      end
+
       private
 
       def parse_contacts_xml(response)
@@ -118,6 +124,13 @@ module OfficeAutopilot
               end
             end
           end
+        end
+      end
+
+      def xml_for_tag(id, tag)
+        xml = Builder::XmlMarkup.new
+        xml.contact({:id => id}) do
+            xml.tag(tag)
         end
       end
 
