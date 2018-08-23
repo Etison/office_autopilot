@@ -10,9 +10,9 @@ describe OfficeAutopilot::Client do
 
   describe "#new" do
     it "initializes with the given API credentials" do
-      @client.api_id.should == @api_id
-      @client.api_key.should == @api_key
-      @client.auth.should == { 'Appid' => @api_id, 'Key' => @api_key }
+      expect(@client.api_id).to eq @api_id
+      expect(@client.api_key).to eq @api_key
+      expect(@client.auth).to eq({ 'Appid' => @api_id, 'Key' => @api_key })
     end
 
     it "raises an ArgumentError when :api_id is not provided" do
@@ -29,8 +29,17 @@ describe OfficeAutopilot::Client do
   end
 
   describe "#request" do
+    let(:path) { 'path' }
+    let(:options) { { body: { key: 'value' } } }
+    response = '<result>Success</result>'
+
+    before do
+      allow(OfficeAutopilot::Request).to receive(:contact).with(path, options)
+        .and_return(response)
+    end
+
     it "makes a HTTP request" do
-       pending "can't seem to stub out OfficeAutopilot::Request.post"
+      expect(@client.request(:contact, path, options)).to eq response
     end
   end
 
@@ -38,7 +47,7 @@ describe OfficeAutopilot::Client do
     context "when there are no errors" do
       it "returns the response verbatim" do
         response = '<result>Success</result>'
-        @client.handle_response(response).should == response
+        expect(@client.handle_response(response)).to eq response
       end
     end
 

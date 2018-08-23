@@ -37,9 +37,9 @@ describe OfficeAutopilot::Client::Contacts do
         value = "john@example.com"
 
         xml = Nokogiri::XML(@client.send(:xml_for_search, { :field => field, :op => op, :value => value }) )
-        xml.at_css('field').content.should == field
-        xml.at_css('op').content.should == op
-        xml.at_css('value').content.should == value
+        expect(xml.at_css('field').content).to eq field
+        expect(xml.at_css('op').content).to eq op
+        expect(xml.at_css('value').content).to eq value
       end
     end
 
@@ -52,13 +52,13 @@ describe OfficeAutopilot::Client::Contacts do
 
         xml = @client.send(:xml_for_search, search_options)
         xml = Nokogiri::XML(xml)
-        xml.css('field')[0].content.should == 'E-Mail'
-        xml.css('op')[0].content.should == 'e'
-        xml.css('value')[0].content.should == 'foo@example.com'
+        expect(xml.css('field')[0].content).to eq 'E-Mail'
+        expect(xml.css('op')[0].content).to eq 'e'
+        expect(xml.css('value')[0].content).to eq 'foo@example.com'
 
-        xml.css('field')[1].content.should == 'Contact Tags'
-        xml.css('op')[1].content.should == 'n'
-        xml.css('value')[1].content.should == 'bar'
+        expect(xml.css('field')[1].content).to eq 'Contact Tags'
+        expect(xml.css('op')[1].content).to eq 'n'
+        expect(xml.css('value')[1].content).to eq 'bar'
       end
     end
   end
@@ -73,8 +73,8 @@ describe OfficeAutopilot::Client::Contacts do
       stub_request(:post, @contact_endpoint).with(:body => request_body).to_return(:body => contacts_xml)
 
       contacts = @client.contacts_search(search_options)
-      WebMock.should have_requested(:post, @contact_endpoint).with(:body => request_body)
-      contacts.should == @client.send(:parse_contacts_xml, contacts_xml)
+      expect(WebMock).to have_requested(:post, @contact_endpoint).with(:body => request_body)
+      expect(contacts).to eq @client.send(:parse_contacts_xml, contacts_xml)
     end
   end
 
@@ -90,14 +90,14 @@ describe OfficeAutopilot::Client::Contacts do
       xml = @client.send(:xml_for_contact, @contact_options)
       xml = Nokogiri::XML(xml)
 
-      xml.at_css('contact')['id'].should be_nil
+      expect(xml.at_css('contact')['id']).to be_nil
 
       contact_info = xml.css("contact Group_Tag[name='Contact Information']")
-      contact_info.at_css("field[name='First Name']").content.should == 'Bob'
-      contact_info.at_css("field[name='Last Name']").content.should == 'Foo'
+      expect(contact_info.at_css("field[name='First Name']").content).to eq 'Bob'
+      expect(contact_info.at_css("field[name='Last Name']").content).to eq 'Foo'
 
       lead_info = xml.css("contact Group_Tag[name='Lead Information']")
-      lead_info.at_css("field[name='Contact Owner']").content.should == 'Mr Bar'
+      expect(lead_info.at_css("field[name='Contact Owner']").content).to eq 'Mr Bar'
     end
 
     context "when 'id' is specified" do
@@ -105,13 +105,13 @@ describe OfficeAutopilot::Client::Contacts do
         @contact_options.merge!('id' => '1234')
         xml = Nokogiri::XML( @client.send(:xml_for_contact, @contact_options) )
 
-        xml.at_css('contact')['id'].should == '1234'
+        expect(xml.at_css('contact')['id']).to eq '1234'
         contact_info = xml.css("contact Group_Tag[name='Contact Information']")
-        contact_info.at_css("field[name='First Name']").content.should == 'Bob'
-        contact_info.at_css("field[name='Last Name']").content.should == 'Foo'
+        expect(contact_info.at_css("field[name='First Name']").content).to eq 'Bob'
+        expect(contact_info.at_css("field[name='Last Name']").content).to eq 'Foo'
 
         lead_info = xml.css("contact Group_Tag[name='Lead Information']")
-        lead_info.at_css("field[name='Contact Owner']").content.should == 'Mr Bar'
+        expect(lead_info.at_css("field[name='Contact Owner']").content).to eq 'Mr Bar'
       end
     end
   end
@@ -121,14 +121,14 @@ describe OfficeAutopilot::Client::Contacts do
       it "returns an array containing the contact" do
         contacts = @client.send(:parse_contacts_xml, test_data('contacts_search_single_response.xml'))
 
-        contacts.size.should == 1
+        expect(contacts.size).to eq 1
 
         contacts.each do |contact|
-          contact['id'].should == '7'
-          contact['Contact Information']['First Name'].should == 'prashant'
-          contact['Contact Information']['Last Name'].should == 'nadarajan'
-          contact['Contact Information']['E-Mail'].should == 'prashant@example.com'
-          contact['Lead Information']['Contact Owner'].should == 'Don Corleone'
+          expect(contact['id']).to eq '7'
+          expect(contact['Contact Information']['First Name']).to eq 'prashant'
+          expect(contact['Contact Information']['Last Name']).to eq 'nadarajan'
+          expect(contact['Contact Information']['E-Mail']).to eq 'prashant@example.com'
+          expect(contact['Lead Information']['Contact Owner']).to eq 'Don Corleone'
         end
       end
     end
@@ -137,15 +137,15 @@ describe OfficeAutopilot::Client::Contacts do
       it "returns an array containing the contacts" do
         contacts = @client.send(:parse_contacts_xml, test_data('contacts_search_multiple_response.xml'))
 
-        contacts.size.should == 3
+        expect(contacts.size).to eq 3
 
-        contacts[0]['id'].should == '8'
-        contacts[0]['Contact Information']['E-Mail'].should == 'bobby@example.com'
-        contacts[0]['Lead Information']['Contact Owner'].should == 'Jimbo Watunusi'
+        expect(contacts[0]['id']).to eq '8'
+        expect(contacts[0]['Contact Information']['E-Mail']).to eq 'bobby@example.com'
+        expect(contacts[0]['Lead Information']['Contact Owner']).to eq 'Jimbo Watunusi'
 
-        contacts[1]['id'].should == '5'
-        contacts[1]['Contact Information']['E-Mail'].should == 'ali@example.com'
-        contacts[1]['Lead Information']['Contact Owner'].should == 'Jimbo Watunusi'
+        expect(contacts[1]['id']).to eq '5'
+        expect(contacts[1]['Contact Information']['E-Mail']).to eq 'ali@example.com'
+        expect(contacts[1]['Lead Information']['Contact Owner']).to eq 'Jimbo Watunusi'
       end
     end
   end
@@ -164,13 +164,13 @@ describe OfficeAutopilot::Client::Contacts do
       stub_request(:post, @contact_endpoint).with(:body => request_body).to_return(:body => response_contact_xml)
 
       contact = @client.contacts_add(contact_options)
-      WebMock.should have_requested(:post, @contact_endpoint).with(:body => request_body)
+      expect(WebMock).to have_requested(:post, @contact_endpoint).with(:body => request_body)
 
-      contact['id'].should == '7'
-      contact['Contact Information']['First Name'].should == 'prashant'
-      contact['Contact Information']['Last Name'].should == 'nadarajan'
-      contact['Contact Information']['E-Mail'].should == 'prashant@example.com'
-      contact['Lead Information']['Contact Owner'].should == 'Don Corleone'
+      expect(contact['id']).to eq '7'
+      expect(contact['Contact Information']['First Name']).to eq 'prashant'
+      expect(contact['Contact Information']['Last Name']).to eq 'nadarajan'
+      expect(contact['Contact Information']['E-Mail']).to eq 'prashant@example.com'
+      expect(contact['Lead Information']['Contact Owner']).to eq 'Don Corleone'
     end
   end
 
@@ -180,9 +180,9 @@ describe OfficeAutopilot::Client::Contacts do
       stub_request(:post, @contact_endpoint).with(:body => request_body('pull_tag')).to_return(:body => pull_tags_xml)
 
       tags = @client.contacts_pull_tag
-      tags['3'].should == 'newleads'
-      tags['4'].should == 'old_leads'
-      tags['5'].should == 'legacy Leads'
+      expect(tags['3']).to eq 'newleads'
+      expect(tags['4']).to eq 'old_leads'
+      expect(tags['5']).to eq 'legacy Leads'
     end
   end
 
@@ -191,8 +191,8 @@ describe OfficeAutopilot::Client::Contacts do
       xml = test_data('contacts_fetch_sequences.xml')
       stub_request(:post, @contact_endpoint).with(:body => request_body('fetch_sequences')).to_return(:body => xml)
       sequences = @client.contacts_fetch_sequences
-      sequences['3'].should == 'APPOINTMENT REMINDER'
-      sequences['4'].should == 'foo sequence'
+      expect(sequences['3']).to eq 'APPOINTMENT REMINDER'
+      expect(sequences['4']).to eq 'foo sequence'
     end
   end
 
@@ -202,20 +202,20 @@ describe OfficeAutopilot::Client::Contacts do
       stub_request(:post, @contact_endpoint).with(:body => request_body('key')).to_return(:body => xml)
 
       result = @client.contacts_key
-      result["Contact Information"]["editable"].should be_false
-      result["Contact Information"]["fields"]["Cell Phone"]["editable"].should be_false
-      result["Contact Information"]["fields"]["Cell Phone"]["type"].should == "phone"
-      result["Contact Information"]["fields"]["Birthday"]["type"].should == "fulldate"
+      expect(result["Contact Information"]["editable"]).to be_falsey
+      expect(result["Contact Information"]["fields"]["Cell Phone"]["editable"]).to be_falsey
+      expect(result["Contact Information"]["fields"]["Cell Phone"]["type"]).to eq "phone"
+      expect(result["Contact Information"]["fields"]["Birthday"]["type"]).to eq "fulldate"
 
-      result["Lead Information"]["fields"]["Lead Source"]["type"].should == "tdrop"
-      result["Lead Information"]["fields"]["Lead Source"]["options"][0].should == "Adwords"
-      result["Lead Information"]["fields"]["Lead Source"]["options"][4].should == "Newspaper Ad"
+      expect(result["Lead Information"]["fields"]["Lead Source"]["type"]).to eq "tdrop"
+      expect(result["Lead Information"]["fields"]["Lead Source"]["options"][0]).to eq "Adwords"
+      expect(result["Lead Information"]["fields"]["Lead Source"]["options"][4]).to eq "Newspaper Ad"
 
-      result["Sequences and Tags"]["fields"]["Contact Tags"]["type"].should == "list"
-      result["Sequences and Tags"]["fields"]["Contact Tags"]["list"]["5"].should == "legacy Leads"
+      expect(result["Sequences and Tags"]["fields"]["Contact Tags"]["type"]).to eq "list"
+      expect(result["Sequences and Tags"]["fields"]["Contact Tags"]["list"]["5"]).to eq "legacy Leads"
 
-      result["PrecisoPro"]["editable"].should be_true
-      result["PrecisoPro"]["fields"]["Lead Status"]["editable"].should be_true
+      expect(result["PrecisoPro"]["editable"]).to be_truthy
+      expect(result["PrecisoPro"]["fields"]["Lead Status"]["editable"]).to be_truthy
     end
   end
 
@@ -227,8 +227,8 @@ describe OfficeAutopilot::Client::Contacts do
         stub_request(:post, @contact_endpoint).with(:body => request_body('fetch', 'data' => xml_request )).to_return(:body => xml_response)
 
         results = @client.contacts_fetch([8, 5, 7])
-        results.size.should == 3
-        results[0]["Contact Information"].should_not be_nil
+        expect(results.size).to eq 3
+        expect(results[0]["Contact Information"]).not_to be_nil
       end
     end
 
